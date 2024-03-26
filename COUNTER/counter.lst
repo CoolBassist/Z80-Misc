@@ -1,0 +1,62 @@
+              	; --------------------------------------
+              	; zasm: assemble "counter.asm"
+              	; date: 2023-11-24 13:08:42
+              	; --------------------------------------
+
+
+0004:         	LED equ 4h
+              	
+0000:         	    org 0
+              	
+0000: 3E00    	    LD  A, 0h
+0002: 210080  	    LD  HL, 8000h
+0005: 77      	    LD  (HL), A
+              	
+0006:         	cond0:
+0006: 210080  	    LD  HL, 8000h
+0009: 7E      	    LD  A,  (HL)
+              	
+000A: 3E0A    	    LD  A, 10
+000C: 21FFFF  	    LD  HL, 0FFFFh
+000F: AE      	    XOR (HL)
+0010: C21600  	    JP  nz, loop0
+0013: C33100  	    JP  end0
+              	
+0016:         	loop0:
+0016: 210080  	    LD  HL, 8000h
+0019: 7E      	    LD  A, (HL)
+001A: D304    	    OUT LED, A
+              	
+001C: 210080  	    LD  HL, 8000h
+001F: 7E      	    LD  A, (HL)
+0020: 21FFFF  	    LD  HL, 0FFFFh
+0023: 77      	    LD  (HL), A
+0024: 3E01    	    LD  A, 1
+0026: 21FFFF  	    LD  HL, 0FFFFh
+0029: 86      	    ADD A, (HL)
+              	
+002A: 210080  	    LD HL, 8000h
+002D: 77      	    LD (HL), A
+              	
+002E: C30600  	    JP cond0
+              	
+0031:         	end0:
+0031: 76      	    HALT
+
+
+; +++ segments +++
+
+#CODE          = $0000 =     0,  size = $0032 =    50
+
+; +++ global symbols +++
+
+LED     = $0004 =     4          counter.asm:1
+_end    = $0032 =    50          counter.asm:3 (unused)
+_size   = $0032 =    50          counter.asm:3 (unused)
+cond0   = $0006 =     6          counter.asm:9
+end0    = $0031 =    49          counter.asm:37
+loop0   = $0016 =    22          counter.asm:19
+
+
+total time: 0.0056 sec.
+no errors

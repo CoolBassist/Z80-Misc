@@ -1,0 +1,89 @@
+              	; --------------------------------------
+              	; zasm: assemble "hw.asm"
+              	; date: 2023-11-06 20:52:56
+              	; --------------------------------------
+
+
+0000:         	    org 0
+              	
+0000:         	LCDCOM  equ 0h
+0001:         	LCDCHAR equ 1h
+              	
+              	
+              	
+0000: 3E38    	    LD  A,  38h ; FUNCTION SET. 00  0011 1000 
+0002: D300    	    OUT LCDCOM, A 
+0004: D300    	    OUT LCDCOM, A
+              	
+0006: 3E0C    	    LD  A,  0Ch ; DISPLAY ON.   00  0000 1100 
+0008: D300    	    OUT LCDCOM, A
+              	
+000A: 3E01    	    LD  A,  1h  ; CLEAR DISP.   00  0000 0001
+000C: D300    	    OUT LCDCOM, A
+              	
+000E: 3E06    	    LD  A,  6h  ; ENTRY MODE.   00  0000 0110
+0010: D300    	    OUT LCDCOM, A
+              	
+0012: 3E48    	    LD  A, "H"  ; CHARACTER.    'H'
+0014: D301    	    OUT LCDCHAR, A
+              	
+0016: 3E65    	    LD  A, "e"  ; CHARACTER.    'e'
+0018: D301    	    OUT LCDCHAR, A
+              	
+001A: 3E6C    	    LD  A, "l"  ; CHARACTER.    'l'
+001C: D301    	    OUT LCDCHAR, A
+              	
+001E: 3E6C    	    LD  A, "l"  ; CHARACTER.    'l'
+0020: D301    	    OUT LCDCHAR, A
+              	
+0022: 3E6F    	    LD  A, "o"  ; CHARACTER.    'o'
+0024: D301    	    OUT LCDCHAR, A
+              	
+0026: 3E2C    	    LD  A, ","  ; CHARACTER.    ','
+0028: D301    	    OUT LCDCHAR, A
+              	
+002A: 3E20    	    LD  A, " "  ; CHARACTER.    ' '
+002C: D301    	    OUT LCDCHAR, A
+              	
+002E: 3E77    	    LD  A, "w"  ; CHARACTER.    'w'
+0030: D301    	    OUT LCDCHAR, A
+              	
+0032: 3E6F    	    LD  A, "o"  ; CHARACTER.    'o'
+0034: D301    	    OUT LCDCHAR, A
+              	
+0036: 3E72    	    LD  A, "r"  ; CHARACTER.    'r'
+0038: D301    	    OUT LCDCHAR, A
+              	
+003A: 3E6C    	    LD  A, "l"  ; CHARACTER.    'l'
+003C: D301    	    OUT LCDCHAR, A
+              	
+003E: 3E64    	    LD  A, "d"  ; CHARACTER.    'd'
+0040: D301    	    OUT LCDCHAR, A
+              	
+0042: 3E21    	    LD  A, "!"  ; CHARACTER.    '!'
+0044: D301    	    OUT LCDCHAR, A
+              	
+              	
+0046:         	l1:
+0046: C34600  	    JP l1
+              	
+              	
+              	
+              	
+
+
+; +++ segments +++
+
+#CODE          = $0000 =     0,  size = $0049 =    73
+
+; +++ global symbols +++
+
+LCDCHAR = $0001 =     1          hw.asm:4
+LCDCOM  = $0000 =     0          hw.asm:3
+_end    = $0049 =    73          hw.asm:1 (unused)
+_size   = $0049 =    73          hw.asm:1 (unused)
+l1      = $0046 =    70          hw.asm:61
+
+
+total time: 0.0068 sec.
+no errors

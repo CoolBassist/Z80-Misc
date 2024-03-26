@@ -1,0 +1,34 @@
+              	; --------------------------------------
+              	; zasm: assemble "fib_better.asm"
+              	; date: 2023-11-06 16:14:07
+              	; --------------------------------------
+
+
+0000:         	    org 0
+              	
+0000: 3E01    	    LD  A,  1H
+0002: 0601    	    LD  B,  1H
+              	
+0004: D300    	l1: OUT 0H, A
+0006: 80      	    ADD A,  B
+0007: 4F      	    LD  C,  A
+0008: 78      	    LD  A,  B
+0009: 41      	    LD  B,  C
+000A: D20400  	    JP  NC, l1
+              	
+000D: 76      	    HALT
+
+
+; +++ segments +++
+
+#CODE          = $0000 =     0,  size = $000E =    14
+
+; +++ global symbols +++
+
+_end    = $000E =    14          fib_better.asm:1 (unused)
+_size   = $000E =    14          fib_better.asm:1 (unused)
+l1      = $0004 =     4          fib_better.asm:6
+
+
+total time: 0.0050 sec.
+no errors

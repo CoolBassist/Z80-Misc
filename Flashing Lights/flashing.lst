@@ -1,0 +1,39 @@
+              	; --------------------------------------
+              	; zasm: assemble "flashing.asm"
+              	; date: 2023-11-08 22:54:11
+              	; --------------------------------------
+
+
+0000:         	    org 0
+              	
+0002:         	LCDCOM  equ 2h
+0003:         	LCDCHAR equ 3h
+0004:         	LEDDIS  equ 4h
+              	
+0000: 3E00    	    LD A, 0h
+0002:         	l2:
+0002: D304    	    OUT LEDDIS, A
+0004: 3C      	    INC A
+0005: C30200  	    JP l2
+              	
+              	
+              	
+              	
+
+
+; +++ segments +++
+
+#CODE          = $0000 =     0,  size = $0008 =     8
+
+; +++ global symbols +++
+
+LCDCHAR = $0003 =     3          flashing.asm:4 (unused)
+LCDCOM  = $0002 =     2          flashing.asm:3 (unused)
+LEDDIS  = $0004 =     4          flashing.asm:5
+_end    = $0008 =     8          flashing.asm:1 (unused)
+_size   = $0008 =     8          flashing.asm:1 (unused)
+l2      = $0002 =     2          flashing.asm:8
+
+
+total time: 0.0054 sec.
+no errors

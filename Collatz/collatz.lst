@@ -1,0 +1,163 @@
+              	; --------------------------------------
+              	; zasm: assemble "collatz.asm"
+              	; date: 2023-11-26 10:46:05
+              	; --------------------------------------
+
+
+0002:         	LCDCOM  equ 2
+0003:         	LCDCHR  equ 3
+              	
+0004:         	LEDDIS  equ 4
+              	
+0000:         	    org 0
+              	
+0000: 3E38    	    LD   A, 38H      ; function set.
+0002: D302    	    OUT  LCDCOM, A
+              	
+0004: 3E0C    	    LD   A, 0CH      ; display on
+0006: D302    	    OUT  LCDCOM, A
+              	
+0008: 3E01    	    LD   A, 01H      ; clear display
+000A: D302    	    OUT  LCDCOM, A
+              	
+000C: 3E06    	    LD   A, 06H      ; entry mode
+000E: D302    	    OUT  LCDCOM, A
+              	
+              	    ; Display set up is now finished
+              	    ; Initalising variables
+0010: 31FF80  	    LD   SP, 80FFH   ; Setting stackpointer to highest point in RAM
+              	
+0013: 3E00    	    LD   A, 0
+0015: 320180  	    LD   (8001h), A  ; Number of characters current displayed
+              	
+0018: 3E00    	    LD   A, 0
+001A: 320280  	    LD   (8002h), A  ; Current line
+              	
+001D: 3E00    	    LD   A, 0
+001F: 320380  	    LD   (8003h), A  ; Current index
+              	
+0022: 3E06    	    LD   A, 06H      ; Hard coded input. Change to user entry later.
+              	
+0024:         	begin:
+0024: CD5D00  	    CALL OUTCHAR    ; Output A
+              	
+0027: 210180  	    LD  HL, 8001h   ; number of characters
+002A: 7E      	    LD  A, (HL)     ; loads it into A
+002B: FE0D    	    CP  A, 13       ; Is it greater or equal to 13?
+002D: F23300  	    JP  p, newline  ; If so, add a new line
+0030: C34300  	    JP  continue    ; If not, carry on.
+0033:         	newline:
+0033: 3E20    	    LD  A, 20h      ; Space character
+0035: D303    	    OUT LCDCHR, A   ; Output it
+0037: 210180  	    LD  HL, 8001h   ; Number of characters variable
+003A: 34      	    INC (HL)        ; Plus one
+003B: 7E      	    LD  A, (HL)     ; The second lines begins after 39 characters
+003C: FE28    	    CP  A, 40       ; Is it on the next line?
+003E: C23300  	    JP  nz, newline ; If not, try again
+              	
+0041: 3600    	    LD  (HL), 0     ; Sets the number of characters back to 0
+              	
+0043:         	continue:
+0043: 3A0080  	    LD  A, (8000h)  ; set A back to original
+              	
+0046: FE01    	    CP  A, 1        ; Is A equal to 1?
+0048: CA5700  	    JP  z, end      ; If so jump to end. Halt.
+              	
+004B: CB47    	    BIT  0, A       ; Is A even?
+004D: CA5800  	    JP   z, even    ; If so, jump to even
+0050: 47      	    LD   B, A       ; \
+0051: 87      	    ADD  A, A       ; | 3n
+0052: 80      	    ADD  A, B       ; |
+0053: 3C      	    INC  A          ; / +1
+0054: C32400  	    JP   begin      ; Jump back to the beginning
+              	
+0057:         	end:
+0057: 76      	    HALT            ; End
+              	
+0058:         	even:
+0058: CB1F    	    RR   A          ; Divide A by 2
+005A: C32400  	    JP   begin      ; Jump back to beginning
+              	
+              	
+005D:         	OUTCHAR:
+005D: 320080  	    LD   (8000h), A    ; temporarily store A at memory location 8000
+              	
+              	    ; most significant digit
+              	
+0060: CB1F    	    RR   A              ; \ 
+0062: CB1F    	    RR   A              ; | Moving left most bits to the right
+0064: CB1F    	    RR   A              ; |
+0066: CB1F    	    RR   A              ; /
+              	
+              	
+0068: E60F    	    AND  0Fh            ; A is now within the range 0-F
+006A: FE00    	    CP   A, 0           ; Is A 0?
+006C: CA7B00  	    JP   z, LSD         ; If so, dont bother printing leading digit
+              	                        ; Else, continue printing leading digit
+              	
+006F: 219500  	    LD   HL, characters ; loading the start of array into HL
+0072: 85      	    ADD  A, L           ; indexing the array
+0073: 6F      	    LD   L, A           ; loading the new index into L
+0074: 7E      	    LD   A, (HL)        ; loading the element into A 
+0075: D303    	    OUT  LCDCHR, A      ; output digit
+0077: 210180  	    LD   HL, 8001h      ; Number of characters variable
+007A: 34      	    INC (HL)            ; Plus one
+              	
+              	    ; least significant digit
+007B:         	LSD:
+007B: 3A0080  	    LD   A, (8000h)        ; setting A back to original
+              	
+007E: E60F    	    AND  0Fh            ; A is now within the range 0-F
+              	
+              	    
+0080: 219500  	    LD   HL, characters ; loading the start of array into HL
+0083: 85      	    ADD  A, L           ; indexing the array
+0084: 6F      	    LD   L, A           ; loading the new index into L
+0085: 7E      	    LD   A, (HL)        ; loading the element into A 
+0086: D303    	    OUT  LCDCHR, A      ; output digit
+              	
+              	    ; printing a space
+              	
+0088: 3E20    	    LD   A, 20H         ; ' ' character
+008A: D303    	    OUT  LCDCHR, A      ; output character
+              	
+              	    ; cleaning up after ourselves
+              	
+008C: 3A0080  	    LD   A, (8000h)        ; put the original value of A back into A.
+008F: 210180  	    LD   HL, 8001h      ; Number of characters variable
+0092: 34      	    INC (HL)            ; Plus one (Least significant digit)
+0093: 34      	    INC (HL)            ; Plus one (SPACE)
+              	
+              	    ; returning
+              	
+0094: C9      	    ret
+              	
+0095: 30313233	characters: .ascii "0123456789ABCDEF"
+0099: 34353637	
+009D: 38394142	
+00A1: 43444546	
+
+
+; +++ segments +++
+
+#CODE          = $0000 =     0,  size = $00A5 =   165
+
+; +++ global symbols +++
+
+LCDCHR     = $0003 =     3          collatz.asm:2
+LCDCOM     = $0002 =     2          collatz.asm:1
+LEDDIS     = $0004 =     4          collatz.asm:4 (unused)
+LSD        = $007B =   123          collatz.asm:101
+OUTCHAR    = $005D =    93          collatz.asm:76
+_end       = $00A5 =   165          collatz.asm:6 (unused)
+_size      = $00A5 =   165          collatz.asm:6 (unused)
+begin      = $0024 =    36          collatz.asm:35
+characters = $0095 =   149          collatz.asm:129
+continue   = $0043 =    67          collatz.asm:54
+end        = $0057 =    87          collatz.asm:68
+even       = $0058 =    88          collatz.asm:71
+newline    = $0033 =    51          collatz.asm:43
+
+
+total time: 0.0024 sec.
+no errors

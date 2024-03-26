@@ -1,0 +1,7 @@
+16/03/2024 12:07:23	0002H: OUT (02H),A	Data 38H sent to port 02H
+16/03/2024 12:07:23	0006H: OUT (02H),A	Data 0CH sent to port 02H
+16/03/2024 12:07:23	000AH: OUT (02H),A	Data 01H sent to port 02H
+16/03/2024 12:07:23	000EH: OUT (02H),A	Data 06H sent to port 02H
+16/03/2024 12:07:23	007CH: OUT (03H),A	Data 3EH sent to port 03H
+
+
