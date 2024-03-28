@@ -58,8 +58,8 @@ LCDCHR  equ 3     ; For sending a character to the LCD
       LD    (HL), A
 
       LD    A, 0Ah
-      CALL  outputchar
-      CALL  outputchar
+      CALL  outputchar ; clear the screen
+      CALL  outputchar ; clear the screen
       
       EXX
       EX    AF, AF'
