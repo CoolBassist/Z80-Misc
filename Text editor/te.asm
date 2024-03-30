@@ -80,13 +80,13 @@ outputchar:
 
       LD    HL, 8001h
       LD    A, (HL)
-      CP    A, 13       ; Is the current number of characters equal to 13?
-      CALL  Z, lb       ; If so, put a line break
+      CP    A, 16       ; Is the current number of characters equal to 16?
+      CALL  Z, lb       ; If so, the line is full, put a line break
       
 
 
       LD    A,  (8000h) ; restores A
-      CP    A,  0Ah     ; Is the current character a line break?
+      CP    A,  13      ; Is the current character a line break?
       JP    nz, nonlb   ; If not, continue to the non line break section
 lb:
       LD    HL, 8004h   
