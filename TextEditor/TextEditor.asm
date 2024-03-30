@@ -167,23 +167,6 @@ clearscreen:
 
     RET                  ; returns back to the call in outputchar
 
-
-; Memory map
-; ADDR  | Function
-; ------|---------
-; 8000h | Temporary location for the A register (outputchar)
-; 8001h | Number of characters on current line
-; 8002h | Temporary location for H
-; 8003h | Temporary location for L
-; 8004h | Current line number (0 or 1)
-; 8005h | Temporary location for the A register (outputnum)
-; 8006h | Write pointer for CB
-; 8007h | Read pointer for CB
-;    ....
-; 800Ah | Begin circular buffer
-;    ....
-; 801Ah | End circular buffer
-
 backspace:
     
     LD  HL, CB_WR   ; \
