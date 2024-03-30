@@ -21,6 +21,12 @@
 LCDCOM  equ 2
 LCDCHR  equ 3
 
+T_A_C   equ 8000h
+NO_CHR  equ 8001h
+T_HL    equ 8002h
+
+CUR_LINE equ 8004h
+T_A_N   equ 8005h
 CB_WR   equ 8006h
 CB_RD   equ 8007h
 
@@ -46,8 +52,8 @@ CB_RD   equ 8007h
 	LD  SP, 80FFH   ; Setting stackpointer to highest point in RAM
 
 	LD  A, 0
-	LD  (8001h), A  ; Number of characters on the current line
-	LD  (8004h), A  ; Current line
+	LD  (NO_CHR), A  ; Number of characters on the current line
+	LD  (CUR_LINE), A  ; Current line
 
     LD  A, 0Ah
     LD  (CB_WR), A ; Write pointer for CB
@@ -121,48 +127,48 @@ start:
 	HALT    ; Program should never get here.
 
 outputchar:
-    LD    (8002h), HL ; Stores HL into a temporary location
-    LD    (8000h), A  ; Stores A  into a temporary location
+    LD    (T_HL), HL ; Stores HL into a temporary location
+    LD    (T_A_C), A  ; Stores A  into a temporary location
 
 
     ; Do we need to go onto a new line?
 
-    LD    HL, 8001h
+    LD    HL, NO_CHR
     LD    A, (HL)
     CP    A, 16       ; Is the current number of characters equal to 16?
     CALL  Z, lb       ; If so, put a line break
       
 
 
-    LD    A,  (8000h) ; restores A
+    LD    A,  (T_A_C) ; restores A
     CP    A,  13      ; Is the current character a line break?
     JP    nz, nonlb   ; If not, continue to the non line break section
 lb:
-    LD    HL, 8004h   
+    LD    HL, CUR_LINE   
     LD    A, (HL)     
     CP    A, 1              ; Are we currently on the second line?
     JP    Z, clearscreen    ; If so, clear the screen
     LD    A, 0A8h           ; A is equal to 40, the location of the second line
     OUT   LCDCOM, A         ; Puts the cursor on the second line
-    LD    HL, 8001h   
+    LD    HL, NO_CHR   
     LD    (HL), 0           ; sets the current number of characters to 0
-    LD    HL, 8004h   
+    LD    HL, CUR_LINE   
     INC   (HL)              ; increments the current line number
     JP    charcleanup
 nonlb:
-    LD    HL, 8001h      ; Number of characters variable
+    LD    HL, NO_CHR      ; Number of characters variable
     INC   (HL)           ; Plus one
     OUT   LCDCHR, A
 charcleanup:
-    LD    HL, (8002h)    ; restores HL
-    LD    A, (8000h)     ; restores A
+    LD    HL, (T_HL)    ; restores HL
+    LD    A, (T_A_C)     ; restores A
     RET
 clearscreen:
     LD    A, 01h
     OUT   LCDCOM, A
-    LD    HL, 8004h
+    LD    HL, CUR_LINE
     LD    (HL), 0        ; resets the line number
-    LD    HL, 8001h   
+    LD    HL, NO_CHR   
     LD    (HL), 0        ; sets the current number of characters to 0
 
     RET                  ; returns back to the call in outputchar
@@ -172,18 +178,18 @@ backspace:
     LD  HL, CB_WR   ; \
     DEC (HL)        ; / decrement value held at the write pointer
 
-    LD  A, (8001h)  ; 
+    LD  A, (NO_CHR)  ; 
     CP  0
     JP  Z, start    ; are we on the far left? If so, just go back.
 
     DEC A
-    LD  (8001h), A
+    LD  (NO_CHR), A
 
-    LD  A, (8004h)
+    LD  A, (CUR_LINE)
     LD  B, 1
     CP  B        ; are we on the second line?
 
-    LD  A, (8001h)
+    LD  A, (NO_CHR)
 
     JP  NZ, backspaceend ; if not just jump to end
 
@@ -213,7 +219,7 @@ outputstring:
     RET
 
 outputnumber:
-    LD   (8005h), A   ; temporarily store A at memory location 8000
+    LD   (CUR_LINE), A   ; temporarily store A at memory location 8000
 
     ; most significant digit
 
@@ -236,7 +242,7 @@ outputnumber:
 
     ; least significant digit
 LSD:
-    LD    A, (8005h)     ; setting A back to original
+    LD    A, (CUR_LINE)     ; setting A back to original
 
     AND   0Fh            ; A is now within the range 0-F
 
@@ -249,7 +255,7 @@ LSD:
 
     ; cleaning up after ourselves
 
-    LD    A, (8005h)     ; put the original value of A back into A.
+    LD    A, (CUR_LINE)     ; put the original value of A back into A.
 
     ; returning
 
