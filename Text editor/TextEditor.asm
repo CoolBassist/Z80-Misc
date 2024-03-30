@@ -185,50 +185,41 @@ clearscreen:
 ; 801Ah | End circular buffer
 
 backspace:
-    LD  A, (8001h)
+    
+    LD  HL, CB_WR   ; \
+    DEC (HL)        ; / decrement value held at the write pointer
+
+    LD  A, (8001h)  ; 
+    CP  0
+    JP  Z, start    ; are we on the far left? If so, just go back.
+
     DEC A
+    LD  (8001h), A
+
+    LD  A, (8004h)
+    LD  B, 1
+    CP  B        ; are we on the second line?
+
+    LD  A, (8001h)
+
+    JP  NZ, backspaceend ; if not just jump to end
+
+    ADD A, 40h
+
+backspaceend:
     OR  80h
+    LD  B, A
+
     OUT LCDCOM, A
     LD  A, ' '
     OUT LCDCHR, A
 
-    LD  A, (8001h)
-    DEC A
-    OR  80h
+    LD  A, B
     OUT LCDCOM, A
 
-    LD  A, (8001h)
-    DEC A
-    LD  (8001h), A
-    LD  HL, CB_WR
-    DEC (HL)
-    JP  start
-
-    ;LD  A, (8004h)
-    ;CP  0   ; are we on the first line?
-    ;JP  Z, backspaceend
-    ;ADD 40
-    ;CP  40
-    ;JP  Z, start
-    ;LD  A, 0Fh
-backspaceend:
-    ;CP  0
-    ;JP  Z, start
-    ;LD  A, (8001h)
-    ;DEC A
-    ;OR  80h
-    ;LD  B, A
-    ;OUT LCDCOM, A
-    ;LD  A, B
-    ;DEC A
-    ;OUT LCDCOM, A
-    ;LD  HL, CB_WR
-    ;DEC (HL)
-    ;LD  HL, (8004h)
-    ;DEC (HL)
-    ;JP  start
     
-
+    JP  start
+    
 outputstring:
     LD    A, (HL)
     CALL  outputchar
