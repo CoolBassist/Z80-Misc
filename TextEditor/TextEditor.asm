@@ -14,22 +14,23 @@
 ; 8006h | Write pointer for CB
 ; 8007h | Read pointer for CB
 ;    ....
-; 800Ah | Begin circular buffer
+; 8010h | Begin circular buffer
 ;    ....
-; 801Ah | End circular buffer
+; 804Fh | End circular buffer
 
-LCDCOM  equ 2
-LCDCHR  equ 3
+LCDCOM  equ 2       ; For sending a command to the LCD
+LCDCHR  equ 3       ; For sending a character to the LCD
 
-T_A_C   equ 8000h
-NO_CHR  equ 8001h
-T_HL    equ 8002h
+T_A_C   equ 8000h   ; Temporary A for char
+NO_CHR  equ 8001h   ; no of characters on the line
+T_HL    equ 8002h   ; temporary HL
 
-CUR_LINE equ 8004h
-T_A_N   equ 8005h
-CB_WR   equ 8006h
-CB_RD   equ 8007h
-
+CUR_LINE equ 8004h  ; Current line number
+T_A_N   equ 8005h   ; temporary A for num
+CB_WR   equ 8006h   ; Circular Buffer write 
+CB_RD   equ 8007h   ; Circular Buffer read
+CB_ST   equ 10h     ; Circular Buffer start
+CB_END  equ 4Fh     ; Circular Buffer end
 
 	org 0
 
@@ -55,7 +56,7 @@ CB_RD   equ 8007h
 	LD  (NO_CHR), A  ; Number of characters on the current line
 	LD  (CUR_LINE), A  ; Current line
 
-    LD  A, 0Ah
+    LD  A, CB_ST
     LD  (CB_WR), A ; Write pointer for CB
     LD  (CB_RD), A ; Read pointer for CB
 
@@ -81,11 +82,11 @@ CB_RD   equ 8007h
     LD    (HL), A       ; Load the user input into the read pointer
     LD    HL, CB_WR
     INC   (HL)          ; increment read pointer
-    LD    A, L
-    LD    B, 1Ah
+    LD    A, (HL)
+    LD    B, CB_END
     CP    B
     JP    NZ, intreturn
-    LD    A, 0Ah
+    LD    A, CB_ST
     LD    (CB_WR), A
 
 intreturn:
@@ -115,11 +116,11 @@ start:
     call outputchar     ; output value.
     LD   HL, CB_RD
     INC  (HL)           ; increment the RP
-    LD   A, L           ; load the inc RP into mem
-    LD   B, 1Ah         ; 
+    LD   A, (HL)           ; load the inc RP into mem
+    LD   B, CB_END         ; 
     CP   B              ; is it at the end of the CB?
     JP   NZ, start      ; if not go back.
-    LD   A, 0Ah         
+    LD   A, CB_ST         
     LD   (CB_RD), A     ; if so, reset the read pointer
     
     JP   start
