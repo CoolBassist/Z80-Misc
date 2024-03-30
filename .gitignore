@@ -56,5 +56,3 @@ dkms.conf
 
 *.lst
 *.rom
-Text editor/*.rom
-Text editor/*.lst
