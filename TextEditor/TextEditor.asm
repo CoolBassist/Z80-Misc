@@ -90,10 +90,9 @@ CB_END	equ 4Fh		; Circular Buffer end
 	LD	L, (HL)		; deferencing pointer
 	LD	(HL), A		; Load the user input into the read pointer
 	LD	HL, CB_WR
-	INC	(HL)			; increment read pointer
+	INC	(HL)			; increment write pointer
 	LD	A, (HL)
-	LD	B, CB_END
-	CP	B
+	CP	CB_END
 	JP	NZ, intreturn
 	LD	A, CB_ST
 	LD	(CB_WR), A
@@ -107,9 +106,8 @@ intreturn:
 start:
 	LD	HL, CB_WR
 	LD	A, (HL)		; Loads the write pointer into A
-	INC	HL
-	LD	B, (HL)		; Loads the read pointer into B
-	CP	B			; If the read and write pointers are equal, theres nothing to do.
+	INC	HL			; HL now contains read pointer
+	CP	(HL)			; If the read and write pointers are equal, theres nothing to do.
 	JP	Z, start
 
 	; Special key checking
@@ -130,8 +128,7 @@ start:
 	LD	HL, CB_RD
 	INC	(HL)			; Increment the RP
 	LD	A, (HL)		; Load the inc RP into mem
-	LD	B, CB_END
-	CP	B			; Is it at the end of the CB?
+	CP	CB_END		; Is it at the end of the CB?
 	JP	NZ, start		; If not go back.
 	LD	A, CB_ST
 	LD	(CB_RD), A		; If so, reset the read pointer
@@ -186,16 +183,15 @@ backspace:
 	LD	C, A			; how many characters are on the line
 
 	LD	A, D
-	LD	B, 1
-	CP	B			; are we on the second line?
+	CP	1			; are we on the second line?
 
 	LD	A, C
 
-	JP	NZ, bsend		; if not just jump to end
+	JP	NZ, bs_end		; if not just jump to end
 
 	ADD	A, 40h
 
-bsend:
+bs_end:
 	OR	80h			; 1xxx xxxx instructions move the cursor on the LCD
 	LD	B, A			; Temporarily store A in B
 
@@ -207,51 +203,3 @@ bsend:
 	OUT	LCDCOM, A		; Move the cursor back again
 
 	JP	start
-    
-outputstr:
-	LD	A, (HL)		; Load the first character in A
-	CALL	outputchar		; Print it.
-	INC	HL			; \ 
-	LD	A, (HL)		; / Load the next character in A
-	CP	A, 0			; Is is the null terminator?
-	JP	NZ, outputstr	; If not, go onto next character
-	RET				; If so, return from subroutine.
-
-outputnumber:
-	LD	(T_A), A           
-
-    ; most significant digit
-
-	RRA				; \ 
-	RRA				; | Moving left most bits to the right
-	RRA				; |
-	RRA				; /
-
-	AND	0Fh			; A is now within the range 0-F
-	CP	A, 0			; Is A 0?
-	JP	z, LSD		; If so, dont bother printing leading digit
-
-	LD	HL, characters	; Loading the start of array into HL
-	ADD	A, L			; Indexing the array
-	LD	L, A			; Loading the new index into L
-	LD	A, (HL)		; Loading the element into A 
-	CALL	outputchar		; Output digit
-
-    ; least significant digit
-LSD:
-	LD	A, (T_A)		; Setting A back to original
-
-	AND	0Fh			; A is now within the range 0-F
-
-    
-	LD	HL, characters	; Loading the start of array into HL
-	ADD	A, L			; Indexing the array
-	LD	L, A			; Loading the new index into L
-	LD	A, (HL)		; Loading the element into A 
-	CALL	outputchar		; Output digit
-
-	LD	A, (T_A)		; Put the original value of A back into A.
-
-	RET
-
-characters: .ascii "0123456789ABCDEF"
