@@ -1,14 +1,11 @@
               	; --------------------------------------
               	; zasm: assemble "Collatz.asm"
-              	; date: 2024-03-31 12:40:18
+              	; date: 2024-03-31 17:01:22
               	; --------------------------------------
 
 
               	; Program for printing out the collatz sequence for a given number.
               	; Written by github.com/coolbassist
-              	; Program for outputting text from a keyboard
-              	; Written by github.com/coolbassist
-              	
               	
               	; Memory map
               	; ADDR  | Function
@@ -343,38 +340,38 @@
 
 ; +++ global symbols +++
 
-CB_END       = $004F =    79          Collatz.asm:36
-CB_RD        = $8007 = 32775          Collatz.asm:33
-CB_ST        = $0010 =    16          Collatz.asm:35
-CB_WR        = $8006 = 32774          Collatz.asm:32
-CUR_LINE     = $8004 = 32772          Collatz.asm:30
-HAS_START    = $8008 = 32776          Collatz.asm:34
-LCDCHR       = $0003 =     3          Collatz.asm:24
-LCDCOM       = $0002 =     2          Collatz.asm:23
-LSD          = $018E =   398          Collatz.asm:308
-NO_CHR       = $8001 = 32769          Collatz.asm:27
-T_A_C        = $8000 = 32768          Collatz.asm:26
-T_A_N        = $8005 = 32773          Collatz.asm:31
-T_HL         = $8002 = 32770          Collatz.asm:28
-_end         = $01C6 =   454          Collatz.asm:38 (unused)
-_size        = $01C6 =   454          Collatz.asm:38 (unused)
-atn          = $01B0 =   432          Collatz.asm:322
-backspace    = $013A =   314          Collatz.asm:251
-backspaceend = $0158 =   344          Collatz.asm:266
-characters   = $01A0 =   416          Collatz.asm:320
-charcleanup  = $0124 =   292          Collatz.asm:237
-clearscreen  = $012B =   299          Collatz.asm:241
-evenroutine  = $00E1 =   225          Collatz.asm:196
-intreturn    = $0052 =    82          Collatz.asm:95
-lb           = $0105 =   261          Collatz.asm:221
-nonlb        = $011E =   286          Collatz.asm:233
-outputchar   = $00EE =   238          Collatz.asm:204
-outputnumber = $0173 =   371          Collatz.asm:285
-outputstring = $0167 =   359          Collatz.asm:276
-start        = $0056 =    86          Collatz.asm:101
-startcollatz = $00C7 =   199          Collatz.asm:180
-startprogram = $008B =   139          Collatz.asm:135
+CB_END       = $004F =    79          Collatz.asm:33
+CB_RD        = $8007 = 32775          Collatz.asm:30
+CB_ST        = $0010 =    16          Collatz.asm:32
+CB_WR        = $8006 = 32774          Collatz.asm:29
+CUR_LINE     = $8004 = 32772          Collatz.asm:27
+HAS_START    = $8008 = 32776          Collatz.asm:31
+LCDCHR       = $0003 =     3          Collatz.asm:21
+LCDCOM       = $0002 =     2          Collatz.asm:20
+LSD          = $018E =   398          Collatz.asm:305
+NO_CHR       = $8001 = 32769          Collatz.asm:24
+T_A_C        = $8000 = 32768          Collatz.asm:23
+T_A_N        = $8005 = 32773          Collatz.asm:28
+T_HL         = $8002 = 32770          Collatz.asm:25
+_end         = $01C6 =   454          Collatz.asm:35 (unused)
+_size        = $01C6 =   454          Collatz.asm:35 (unused)
+atn          = $01B0 =   432          Collatz.asm:319
+backspace    = $013A =   314          Collatz.asm:248
+backspaceend = $0158 =   344          Collatz.asm:263
+characters   = $01A0 =   416          Collatz.asm:317
+charcleanup  = $0124 =   292          Collatz.asm:234
+clearscreen  = $012B =   299          Collatz.asm:238
+evenroutine  = $00E1 =   225          Collatz.asm:193
+intreturn    = $0052 =    82          Collatz.asm:92
+lb           = $0105 =   261          Collatz.asm:218
+nonlb        = $011E =   286          Collatz.asm:230
+outputchar   = $00EE =   238          Collatz.asm:201
+outputnumber = $0173 =   371          Collatz.asm:282
+outputstring = $0167 =   359          Collatz.asm:273
+start        = $0056 =    86          Collatz.asm:98
+startcollatz = $00C7 =   199          Collatz.asm:177
+startprogram = $008B =   139          Collatz.asm:132
 
 
-total time: 0.0058 sec.
+total time: 0.0036 sec.
 no errors

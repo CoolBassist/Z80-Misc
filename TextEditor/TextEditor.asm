@@ -18,19 +18,19 @@
 ;    ....
 ; 804Fh | End circular buffer
 
-LCDCOM  equ 2       ; For sending a command to the LCD
-LCDCHR  equ 3       ; For sending a character to the LCD
+LCDCOM   equ 2       ; For sending a command to the LCD
+LCDCHR   equ 3       ; For sending a character to the LCD
 
-T_A_C   equ 8000h   ; Temporary A for char
-NO_CHR  equ 8001h   ; no of characters on the line
-T_HL    equ 8002h   ; temporary HL
+T_A_C    equ 8000h   ; Temporary A for char
+NO_CHR   equ 8001h   ; no of characters on the line
+T_HL     equ 8002h   ; temporary HL
 
 CUR_LINE equ 8004h  ; Current line number
-T_A_N   equ 8005h   ; temporary A for num
-CB_WR   equ 8006h   ; Circular Buffer write 
-CB_RD   equ 8007h   ; Circular Buffer read
-CB_ST   equ 10h     ; Circular Buffer start
-CB_END  equ 4Fh     ; Circular Buffer end
+T_A_N    equ 8005h   ; temporary A for num
+CB_WR    equ 8006h   ; Circular Buffer write 
+CB_RD    equ 8007h   ; Circular Buffer read
+CB_ST    equ 10h     ; Circular Buffer start
+CB_END   equ 4Fh     ; Circular Buffer end
 
 	org 0
 
@@ -62,10 +62,10 @@ CB_END  equ 4Fh     ; Circular Buffer end
 
 	EI                ; enable interrupts
 
-	IM 1           ; interrupt mode 1
+	IM  1           ; interrupt mode 1
 
-	LD A, '>'
-	CALL  outputchar
+	LD      A, '>'
+	CALL    outputchar
 
 	JP start
 
@@ -73,77 +73,72 @@ CB_END  equ 4Fh     ; Circular Buffer end
 
 	DI      ; Disable interrupts
 
-	EX AF, AF'  ; Save the current register state
+	EX  AF, AF'  ; Save the current register state
 	EXX
 
-	IN    A, 0h         ; get user input
-    LD    HL, CB_WR     ; load read pointer into HL
-    LD    L, (HL)       ; deferencing pointer
-    LD    (HL), A       ; Load the user input into the read pointer
-    LD    HL, CB_WR
-    INC   (HL)          ; increment read pointer
-    LD    A, (HL)
-    LD    B, CB_END
-    CP    B
-    JP    NZ, intreturn
-    LD    A, CB_ST
-    LD    (CB_WR), A
+	IN  A, 0h         ; get user input
+    LD  HL, CB_WR     ; load read pointer into HL
+    LD  L, (HL)       ; deferencing pointer
+    LD  (HL), A       ; Load the user input into the read pointer
+    LD  HL, CB_WR
+    INC (HL)          ; increment read pointer
+    LD  A, (HL)
+    LD  B, CB_END
+    CP  B
+    JP  NZ, intreturn
+    LD  A, CB_ST
+    LD  (CB_WR), A
 
 intreturn:
 	EXX
-	EX AF, AF'
+	EX  AF, AF'
 	EI
 	RET
 
 start:
     LD   HL, CB_WR
-    LD   A, (HL)    ; loads the write pointer into A
+    LD   A, (HL)    ; Loads the write pointer into A
     INC  HL         
-    LD   B, (HL)    ; loads the read pointer into B
+    LD   B, (HL)    ; Loads the read pointer into B
     CP   B          ; If the read and write pointers are equal, theres nothing to do.
     JP   Z, start
-    ; checking for special keys
+    ; Special key checking
     LD   A, (CB_RD)
     LD   L, A
     LD   A, (HL)
-    CP   127               ; is a backspace?
-    JP   Z, backspace      ; yes it is, go to backspace subroutine
-	; check for backspace,
-    ; and other keys here
+    ; Backspace checking
+    CP   127            ; Is a backspace?
+    JP   Z, backspace   ; If it is, go to backspace subroutine
+    ; End special key checking, assume its an ASCII character.
     LD   HL, CB_RD      ; Load read pointer into HL
-    LD   L, (HL)        ; dereferencing pointer
-    LD   A, (HL)        ; load the value at RP into A
-    call outputchar     ; output value.
+    LD   L, (HL)        ; Dereferencing pointer
+    LD   A, (HL)        ; Load the value at RP into A
+    CALL outputchar     ; Output value.
     LD   HL, CB_RD
-    INC  (HL)           ; increment the RP
-    LD   A, (HL)           ; load the inc RP into mem
-    LD   B, CB_END         ; 
-    CP   B              ; is it at the end of the CB?
-    JP   NZ, start      ; if not go back.
+    INC  (HL)           ; Increment the RP
+    LD   A, (HL)        ; Load the inc RP into mem
+    LD   B, CB_END
+    CP   B              ; Is it at the end of the CB?
+    JP   NZ, start      ; If not go back.
     LD   A, CB_ST         
-    LD   (CB_RD), A     ; if so, reset the read pointer
+    LD   (CB_RD), A     ; If so, reset the read pointer
     
-    JP   start
-
-	HALT    ; Program should never get here.
+    JP   start          ; Creates infinite loop
 
 outputchar:
-    LD    (T_HL), HL ; Stores HL into a temporary location
-    LD    (T_A_C), A  ; Stores A  into a temporary location
-
+    LD    (T_HL), HL    ; Stores HL into a temporary location
+    LD    (T_A_C), A    ; Stores A  into a temporary location
 
     ; Do we need to go onto a new line?
-
     LD    HL, NO_CHR
     LD    A, (HL)
-    CP    A, 16       ; Is the current number of characters equal to 16?
-    CALL  Z, lb       ; If so, put a line break
-      
+    CP    A, 16         ; Is the current number of characters equal to 16?
+    CALL  Z, lb         ; If so, put a line break
+    
+    LD    A,  (T_A_C)   ; Restores A
+    CP    A,  13        ; Is the current character a line break?
+    JP    nz, nonlb     ; If not, continue to the non line break section
 
-
-    LD    A,  (T_A_C) ; restores A
-    CP    A,  13      ; Is the current character a line break?
-    JP    nz, nonlb   ; If not, continue to the non line break section
 lb:
     LD    HL, CUR_LINE   
     LD    A, (HL)     
@@ -157,12 +152,12 @@ lb:
     INC   (HL)              ; increments the current line number
     JP    charcleanup
 nonlb:
-    LD    HL, NO_CHR      ; Number of characters variable
-    INC   (HL)           ; Plus one
+    LD    HL, NO_CHR        ; Number of characters variable
+    INC   (HL)              ; Plus one
     OUT   LCDCHR, A
 charcleanup:
-    LD    HL, (T_HL)    ; restores HL
-    LD    A, (T_A_C)     ; restores A
+    LD    HL, (T_HL)        ; restores HL
+    LD    A, (T_A_C)        ; restores A
     RET
 clearscreen:
     LD    A, 01h
@@ -171,94 +166,86 @@ clearscreen:
     LD    (HL), 0        ; resets the line number
     LD    HL, NO_CHR   
     LD    (HL), 0        ; sets the current number of characters to 0
-
     RET                  ; returns back to the call in outputchar
 
 backspace:
-    
     LD  HL, CB_WR   ; \
     DEC (HL)        ; / decrement value held at the write pointer
 
-    LD  A, (NO_CHR)  ; 
+    LD  A, (NO_CHR) 
     CP  0
     JP  Z, start    ; are we on the far left? If so, just go back.
 
-    DEC A
-    LD  (NO_CHR), A
+    DEC A           ; since we're deleting a character decrement
+    LD  (NO_CHR), A ; how many characters are on the line
 
     LD  A, (CUR_LINE)
     LD  B, 1
-    CP  B        ; are we on the second line?
+    CP  B           ; are we on the second line?
 
-    LD  A, (NO_CHR)
+    LD  A, (NO_CHR) 
 
     JP  NZ, backspaceend ; if not just jump to end
 
     ADD A, 40h
 
 backspaceend:
-    OR  80h
-    LD  B, A
+    OR  80h         ; 1xxx xxxx instructions move the cursor on the LCD
+    LD  B, A        ; Temporarily store A in B
 
-    OUT LCDCOM, A
-    LD  A, ' '
-    OUT LCDCHR, A
+    OUT LCDCOM, A   ; Move the cursor back   
+    LD  A, ' '      
+    OUT LCDCHR, A   ; Print a space
 
     LD  A, B
-    OUT LCDCOM, A
+    OUT LCDCOM, A   ; Move the cursor back again
 
-    
     JP  start
     
 outputstring:
-    LD    A, (HL)
-    CALL  outputchar
-    INC   HL
-    LD    A, (HL)
-    CP    A, 0
-    JP    NZ, outputstring
-    RET
+    LD    A, (HL)           ; Load the first character in A
+    CALL  outputchar        ; Print it.
+    INC   HL                ; \ 
+    LD    A, (HL)           ; / Load the next character in A
+    CP    A, 0              ; Is is the null terminator?
+    JP    NZ, outputstring  ; If not, go onto next character
+    RET                     ; If so, return from subroutine.
 
 outputnumber:
-    LD   (CUR_LINE), A   ; temporarily store A at memory location 8000
+    LD   (T_A_N), A         ; Temporarily store A at memory location 8000
 
     ; most significant digit
 
-    RR    A           ; \ 
-    RR    A           ; | Moving left most bits to the right
-    RR    A           ; |
-    RR    A           ; /
+    RRA                     ; \ 
+    RRA                     ; | Moving left most bits to the right
+    RRA                     ; |
+    RRA                     ; /
 
+    AND   0Fh               ; A is now within the range 0-F
+    CP    A, 0              ; Is A 0?
+    JP    z, LSD            ; If so, dont bother printing leading digit
+                            ; Else, continue printing leading digit
 
-    AND   0Fh         ; A is now within the range 0-F
-    CP    A, 0        ; Is A 0?
-    JP    z, LSD      ; If so, dont bother printing leading digit
-                        ; Else, continue printing leading digit
-
-    LD    HL, characters ; loading the start of array into HL
-    ADD   A, L           ; indexing the array
-    LD    L, A           ; loading the new index into L
-    LD    A, (HL)        ; loading the element into A 
-    CALL  outputchar     ; output digit
+    LD    HL, characters    ; Loading the start of array into HL
+    ADD   A, L              ; Indexing the array
+    LD    L, A              ; Loading the new index into L
+    LD    A, (HL)           ; Loading the element into A 
+    CALL  outputchar        ; Output digit
 
     ; least significant digit
 LSD:
-    LD    A, (CUR_LINE)     ; setting A back to original
+    LD    A, (T_A_N)     ; Setting A back to original
 
     AND   0Fh            ; A is now within the range 0-F
 
     
-    LD    HL, characters ; loading the start of array into HL
-    ADD   A, L           ; indexing the array
-    LD    L, A           ; loading the new index into L
-    LD    A, (HL)        ; loading the element into A 
-    CALL  outputchar     ; output digit
+    LD    HL, characters ; Loading the start of array into HL
+    ADD   A, L           ; Indexing the array
+    LD    L, A           ; Loading the new index into L
+    LD    A, (HL)        ; Loading the element into A 
+    CALL  outputchar     ; Output digit
 
-    ; cleaning up after ourselves
-
-    LD    A, (CUR_LINE)     ; put the original value of A back into A.
-
-    ; returning
+    LD    A, (T_A_N)     ; Put the original value of A back into A.
 
     RET
 
