@@ -1,8 +1,5 @@
 ; Program for printing out the collatz sequence for a given number.
 ; Written by github.com/coolbassist
-; Program for outputting text from a keyboard
-; Written by github.com/coolbassist
-
 
 ; Memory map
 ; ADDR  | Function
