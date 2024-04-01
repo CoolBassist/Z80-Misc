@@ -43,16 +43,16 @@ CB_END      equ 4Fh           ; Circular Buffer end location
 
       ; Setting up the LCD display
 
-      LD    A, 38H            ; function set.
+      LD    A, 38H            ; Function set.
       OUT   LCDCOM, A
 
-      LD    A, 0FH            ; display on
+      LD    A, 0FH            ; Display on
       OUT   LCDCOM, A
 
-      LD    A, 01H            ; clear display
+      LD    A, 01H            ; Clear display
       OUT   LCDCOM, A
 
-      LD    A, 06H            ; entry mode
+      LD    A, 06H            ; Entry mode
       OUT   LCDCOM, A
 
       ; Display set up is now finished
@@ -66,28 +66,28 @@ CB_END      equ 4Fh           ; Circular Buffer end location
       LD    (CB_WR), A        ; Write pointer for CB
       LD    (CB_RD), A        ; Read pointer for CB
 
-      EI                      ; enable interrupts
+      EI                      ; Enable interrupts
 
-      IM    1                 ; interrupt mode 1
+      IM    1                 ; Interrupt mode 1
 
       LD    A, '>'
       CALL  outputchar
 
       JP    start
 
-      org   38h               ; begin interupt sequence
+      org   38h               ; Begin interupt sequence
 
       DI                      ; Disable interrupts
 
       EX    AF, AF'           ; Save the current register state
       EXX
 
-      IN    A, 0h             ; get user input
-      LD    HL, CB_WR         ; load read pointer into HL
-      LD    L, (HL)           ; deferencing pointer
+      IN    A, 0h             ; Get user input
+      LD    HL, CB_WR         ; Load read pointer into HL
+      LD    L, (HL)           ; Deferencing pointer
       LD    (HL), A           ; Load the user input into the read pointer
       LD    HL, CB_WR
-      INC   (HL)              ; increment write pointer
+      INC   (HL)              ; Increment write pointer
       LD    A, (HL)
       CP    CB_END
       JP    NZ, intreturn
@@ -151,42 +151,49 @@ lb:
       JP    Z, clear          ; If so, clear the screen
       LD    A, 0A8h           ; A is equal to 40, the location of the second line
       OUT   LCDCOM, A         ; Puts the cursor on the second line
-      LD    C, 0              ; sets the current number of characters to 0
-      INC   D                 ; increments the current line number
+      LD    C, 0              ; Sets the current number of characters to 0
+      INC   D                 ; Increments the current line number
       JP    charcleanup
 nonlb:
       INC   C                 ; Plus one
       OUT   LCDCHR, A
 charcleanup:
-      LD    HL, (T_HL)        ; restores HL
-      LD    A, (T_A)          ; restores A
+      LD    HL, (T_HL)        ; Restores HL
+      LD    A, (T_A)          ; Restores A
       RET
 clear:
       LD    A, 01h
       OUT   LCDCOM, A
-      LD    D, 0              ; resets the line number
-      LD    C, 0              ; sets the current number of characters to 0
-      RET                     ; returns back to the call in outputchar
+      LD    D, 0              ; Resets the line number
+      LD    C, 0              ; Sets the current number of characters to 0
+      RET                     ; Returns back to the call in outputchar
 
 backspace:
       LD    HL, CB_WR         ; \
-      DEC   (HL)              ; / decrement value held at the write pointer
+      DEC   (HL)              ; / Decrement value held at the write pointer
 
       LD    A, C 
       CP    0
-      JP    Z, start          ; are we on the far left? If so, just go back.
+      JP    Z, start          ; Are we on the far left? If so, just go back.
 
-      DEC   A                 ; since we're deleting a character decrement
-      LD    C, A              ; how many characters are on the line
+      DEC   A                 ; Since we're deleting a character ~ decrement
+      LD    C, A              ; How many characters are on the line
 
       LD    A, D
-      CP    1                 ; are we on the second line?
+      CP    1                 ; Are we on the second line?
 
       LD    A, C
 
-      JP    NZ, bs_end        ; if not just jump to end
+      JP    NZ, bs_end        ; If not just jump to end
 
-      ADD   A, 40h
+      ADD   A, 40h            ; Else, add 40, to accomodate for the second line on LCD
+
+; The LCD has 2 lines, 16 characters per line, the addresses of each character in the DDRAM is as follows
+; +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+; | 0  | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | A  | B  | C  | D  | E  | F  |
+; +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+; | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 4A | 4B | 4C | 4D | 4E | 4F |
+; +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
 
 bs_end:
       OR    80h               ; 1xxx xxxx instructions move the cursor on the LCD
