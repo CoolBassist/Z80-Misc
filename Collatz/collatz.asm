@@ -150,7 +150,7 @@ startprogram:
       RL    A
       ADD   D
 
-      LD    C, A        ; Store it in C
+      LD    C, A        ; Store the tens number in C
 
       LD    H, 80h
       LD    L, CB_ST

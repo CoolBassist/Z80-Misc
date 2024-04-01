@@ -7,11 +7,10 @@
 ; +-------+------------------------------------------------------+
 ; |  ADDR | Function                                             |
 ; +-------+------------------------------------------------------+
-; | 8000h | Temporary location for the A register                |
-; | 8001h | Temporary location for H                             |
-; | 8002h | Temporary location for L                             |
-; | 8003h | Write pointer for CB                                 |
-; | 8004h | Read pointer for CB                                  |
+; | 8000h | Temporary location for H                             |
+; | 8001h | Temporary location for L                             |
+; | 8002h | Write pointer for CB                                 |
+; | 8003h | Read pointer for CB                                  |
 ; |    ....                                                      |
 ; | 8010h | Begin circular buffer                                |
 ; |    ....                                                      |

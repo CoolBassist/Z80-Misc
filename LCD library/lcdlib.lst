@@ -1,215 +1,155 @@
-              	; --------------------------------------
-              	; zasm: assemble "lcdlib.asm"
-              	; date: 2023-11-26 15:12:46
-              	; --------------------------------------
+; Program for outputting text from a keyboard.
+; 213 bytes total.
+
+; Written by github.com/coolbassist
 
 
-              	                  ; LCD RS is tied to A0, RW is tied to ground
-              	                  ; Z80 A1 is used to enable the LCD, with the IOREQ and WR lines
-0002:         	LCDCOM  equ 2     ; For sending a command to the LCD
-0003:         	LCDCHR  equ 3     ; For sending a character to the LCD
-              	
-0000:         	      org 0
-              	
-              	      ; Setting up the LCD display
-              	
-0000: 3E38    	      LD    A, 38H      ; function set.
-0002: D302    	      OUT   LCDCOM, A
-              	
-0004: 3E0C    	      LD    A, 0CH      ; display on
-0006: D302    	      OUT   LCDCOM, A
-              	
-0008: 3E01    	      LD    A, 01H      ; clear display
-000A: D302    	      OUT   LCDCOM, A
-              	
-000C: 3E06    	      LD    A, 06H      ; entry mode
-000E: D302    	      OUT   LCDCOM, A
-              	
-              	      ; Display set up is now finished
-              	
-              	
-              	
-0010: 31FF80  	      LD   SP, 80FFH   ; Setting stackpointer to highest point in RAM
-              	
-0013: 3E00    	      LD   A, 0
-0015: 320180  	      LD   (8001h), A  ; Number of characters current displayed
-0018: 320480  	      LD   (8004h), A  ; Current line
-              	
-              	
-              	
-              	
-              	      ; /-----------------------\
-              	      ; | Put the program here! |
-              	      ; \-----------------------/
-              	
-001B: 21D500  	      LD    HL, message
-001E: CD8C00  	      CALL  outputstring
-0021: 21E300  	      LD    HL, message2
-0024: CD8C00  	      CALL  outputstring
-              	
-              	
-              	      
-              	
-              	
-0027: 1600    	      LD    D, 0h
-0029: 0605    	      LD    B, 05h
-002B: 0E0A    	      LD    C, 0Ah
-              	
-002D:         	mult:
-002D: 7A      	      LD    A, D
-002E: CD9800  	      CALL  outputnumber
-0031: 80      	      ADD   A, B
-0032: 0D      	      DEC   C
-0033: 57      	      LD    D, A
-0034: 3E20    	      LD    A, ' '
-0036: CD4000  	      call  outputchar
-0039: 79      	      LD    A, C
-003A: FE00    	      CP    0
-003C: C22D00  	      JP    NZ, mult
-              	
-003F: 76      	      HALT
-              	
-              	
-              	
-0040:         	outputchar:
-0040: 220280  	      LD    (8002h), HL ; Stores HL into a temporary location
-0043: 320080  	      LD    (8000h), A  ; Stores A  into a temporary location
-              	
-              	
-              	      ; Do we need to go onto a new line?
-              	
-0046: 210180  	      LD    HL, 8001h
-0049: 7E      	      LD    A, (HL)
-004A: FE10    	      CP    A, 16       ; Is the current number of characters equal to 16?
-004C: CC5700  	      CALL  Z, lb       ; If so, put a line break
-              	      
-              	
-              	
-004F: 3A0080  	      LD    A,  (8000h) ; restores A
-0052: FE0A    	      CP    A,  0Ah     ; Is the current character a line break?
-0054: C27000  	      JP    nz, nonlb   ; If not, continue to the non line break section
-0057:         	lb:
-0057: 210480  	      LD    HL, 8004h   
-005A: 7E      	      LD    A, (HL)     
-005B: FE01    	      CP    A, 1              ; Are we currently on the second line?
-005D: CA7D00  	      JP    Z, clearscreen    ; If so, clear the screen
-0060: 3EA8    	      LD    A, 0A8h           ; A is equal to 40, the location of the second line
-0062: D302    	      OUT   LCDCOM, A         ; Puts the cursor on the second line
-0064: 210180  	      LD    HL, 8001h   
-0067: 3600    	      LD    (HL), 0           ; sets the current number of characters to 0
-0069: 210480  	      LD    HL, 8004h   
-006C: 34      	      INC   (HL)              ; increments the current line number
-006D: C37600  	      JP    charcleanup
-0070:         	nonlb:
-0070: 210180  	      LD    HL, 8001h      ; Number of characters variable
-0073: 34      	      INC   (HL)           ; Plus one
-0074: D303    	      OUT   LCDCHR, A
-0076:         	charcleanup:
-0076: 2A0280  	      LD    HL, (8002h)    ; restores HL
-0079: 3A0080  	      LD    A, (8000h)     ; restores A
-007C: C9      	      RET
-007D:         	clearscreen:
-007D: 3E01    	      LD    A, 01h
-007F: D302    	      OUT   LCDCOM, A
-0081: 210480  	      LD    HL, 8004h
-0084: 3600    	      LD    (HL), 0        ; resets the line number
-0086: 210180  	      LD    HL, 8001h   
-0089: 3600    	      LD    (HL), 0        ; sets the current number of characters to 0
-              	
-008B: C9      	      RET                  ; returns back to the call in outputchar
-              	
-008C:         	outputstring:
-008C: 7E      	      LD    A, (HL)
-008D: CD4000  	      CALL  outputchar
-0090: 23      	      INC   HL
-0091: 7E      	      LD    A, (HL)
-0092: FE00    	      CP    A, 0
-0094: C28C00  	      JP    NZ, outputstring
-0097: C9      	      RET
-              	
-0098:         	outputnumber:
-0098: 320580  	      LD   (8005h), A   ; temporarily store A at memory location 8000
-              	
-              	    ; most significant digit
-              	
-009B: CB1F    	      RR    A           ; \ 
-009D: CB1F    	      RR    A           ; | Moving left most bits to the right
-009F: CB1F    	      RR    A           ; |
-00A1: CB1F    	      RR    A           ; /
-              	
-              	
-00A3: E60F    	      AND   0Fh         ; A is now within the range 0-F
-00A5: FE00    	      CP    A, 0        ; Is A 0?
-00A7: CAB300  	      JP    z, LSD      ; If so, dont bother printing leading digit
-              	                        ; Else, continue printing leading digit
-              	
-00AA: 21C500  	      LD    HL, characters ; loading the start of array into HL
-00AD: 85      	      ADD   A, L           ; indexing the array
-00AE: 6F      	      LD    L, A           ; loading the new index into L
-00AF: 7E      	      LD    A, (HL)        ; loading the element into A 
-00B0: CD4000  	      CALL  outputchar     ; output digit
-              	
-              	    ; least significant digit
-00B3:         	LSD:
-00B3: 3A0580  	      LD    A, (8005h)     ; setting A back to original
-              	
-00B6: E60F    	      AND   0Fh            ; A is now within the range 0-F
-              	
-              	    
-00B8: 21C500  	      LD    HL, characters ; loading the start of array into HL
-00BB: 85      	      ADD   A, L           ; indexing the array
-00BC: 6F      	      LD    L, A           ; loading the new index into L
-00BD: 7E      	      LD    A, (HL)        ; loading the element into A 
-00BE: CD4000  	      CALL  outputchar     ; output digit
-              	
-              	    ; cleaning up after ourselves
-              	
-00C1: 3A0580  	      LD    A, (8005h)     ; put the original value of A back into A.
-              	
-              	    ; returning
-              	
-00C4: C9      	      RET
-              	
-00C5: 30313233	characters: .ascii "0123456789ABCDEF"
-00C9: 34353637	
-00CD: 38394142	
-00D1: 43444546	
-              	
-00D5: 48656C6C	message: .ascii "Hello,", 0AH, "world!", 0
-00D9: 6F2C0A77	
-00DD: 6F726C64	
-00E1: 2100    	
-00E3: 20486F77	message2: .ascii " How are you today? ", 0
-00E7: 20617265	
-00EB: 20796F75	
-00EF: 20746F64	
-00F3: 61793F20	
-00F7: 00      	
+; +-------+------------------------------------------------------+
+; |  ADDR | Function                                             |
+; +-------+------------------------------------------------------+
+; | 8000h | Temporary location for the A register                |
+; | 8001h | Temporary location for H                             |
+; | 8002h | Temporary location for L                             |
+; | 8003h | Write pointer for CB                                 |
+; | 8004h | Read pointer for CB                                  |
+; |    ....                                                      |
+; | 8010h | Begin circular buffer                                |
+; |    ....                                                      |
+; | 804Fh | End circular buffer                                  |
+; +-------+------------------------------------------------------+
+ 
+; +-------+------------------------------------------------------+
+; |  REG  | Function                                             |
+; +-------+------------------------------------------------------+
+; |   A   | Main register                                        |
+; |   B   | Holding values for comparing, or temp storage        |
+; |   C   | How many characters are on the current line          |
+; |   D   | Used for holding what line we're on                  |
+; |   E   | Used for temporarily holding A                       |
+; |   H   | Used for holding the high byte of addresses          |
+; |   L   | Used for holding the low byte of addresses           |
+; +-------+------------------------------------------------------+
+
+LCDCOM      equ 2             ; For sending a command to the LCD
+LCDCHR      equ 3             ; For sending a character to the LCD
+
+T_HL        equ 8000h         ; Temporary H
+;           equ 8001h         ; Temporary L
+
+      org 0
+
+      ; Setting up the LCD display
+
+      LD    A, 38H            ; Function set.
+      OUT   LCDCOM, A
+
+      LD    A, 0FH            ; Display on
+      OUT   LCDCOM, A
+
+      LD    A, 01H            ; Clear display
+      OUT   LCDCOM, A
+
+      LD    A, 06H            ; Entry mode
+      OUT   LCDCOM, A
+
+      ; Display set up is now finished
+
+      LD    SP, 80FFH         ; Setting stackpointer to highest point in RAM
+
+      LD    C, 0              ; Number of characters on the current line
+      LD    D, 0              ; Current line
 
 
-; +++ segments +++
+      ; /-----------------------\
+      ; | Put the program here! |
+      ; \-----------------------/
 
-#CODE          = $0000 =     0,  size = $00F8 =   248
-
-; +++ global symbols +++
-
-LCDCHR       = $0003 =     3          lcdlib.asm:4
-LCDCOM       = $0002 =     2          lcdlib.asm:3
-LSD          = $00B3 =   179          lcdlib.asm:147
-_end         = $00F8 =   248          lcdlib.asm:6 (unused)
-_size        = $00F8 =   248          lcdlib.asm:6 (unused)
-characters   = $00C5 =   197          lcdlib.asm:167
-charcleanup  = $0076 =   118          lcdlib.asm:101
-clearscreen  = $007D =   125          lcdlib.asm:105
-lb           = $0057 =    87          lcdlib.asm:85
-message      = $00D5 =   213          lcdlib.asm:169
-message2     = $00E3 =   227          lcdlib.asm:170
-mult         = $002D =    45          lcdlib.asm:52
-nonlb        = $0070 =   112          lcdlib.asm:97
-outputchar   = $0040 =    64          lcdlib.asm:68
-outputnumber = $0098 =   152          lcdlib.asm:124
-outputstring = $008C =   140          lcdlib.asm:115
+      HALT
 
 
-total time: 0.0085 sec.
+
+
+outputchar:
+      LD    (T_HL), HL        ; Stores HL into a temporary location
+      LD    E, A              ; Stores A  into a temporary location
+
+      ; Do we need to go onto a new line?
+      LD    A, C
+      CP    A, 16             ; Is the current number of characters equal to 16?
+      CALL  Z, lb             ; If so, put a line break
+
+      LD    A,  E             ; Restores A
+      CP    A,  13            ; Is the current character a line break?
+      JP    nz, nonlb         ; If not, continue to the non line break section
+
+lb:
+      LD    A, D
+      CP    A, 1              ; Are we currently on the second line?
+      JP    Z, clear          ; If so, clear the screen
+      LD    A, 0A8h           ; A is equal to 40, the location of the second line
+      OUT   LCDCOM, A         ; Puts the cursor on the second line
+      LD    C, 0              ; Sets the current number of characters to 0
+      INC   D                 ; Increments the current line number
+      JP    charcleanup
+nonlb:
+      INC   C                 ; Plus one
+      OUT   LCDCHR, A
+charcleanup:
+      LD    HL, (T_HL)        ; Restores HL
+      LD    A, E              ; Restores A
+      RET
+clear:
+      LD    A, 01h
+      OUT   LCDCOM, A
+      LD    D, 0              ; Resets the line number
+      LD    C, 0              ; Sets the current number of characters to 0
+      RET                     ; Returns back to the call in outputchar
+
+outputstring:
+      LD    A, (HL)
+      CALL  outputchar
+      INC   HL
+      LD    A, (HL)
+      CP    A, 0
+      JP    NZ, outputstring
+      RET
+
+outputnumber:
+      LD   E, A               ; temporarily store A in E
+
+    ; most significant digit
+
+      RR    A                 ; \ 
+      RR    A                 ; | Moving left most bits to the right
+      RR    A                 ; |
+      RR    A                 ; /
+
+
+      AND   0Fh               ; A is now within the range 0-F
+      CP    A, 0              ; Is A 0?
+      JP    z, LSD            ; If so, dont bother printing leading digit
+
+      LD    HL, characters    ; loading the start of array into HL
+      ADD   A, L              ; indexing the array
+      LD    L, A              ; loading the new index into L
+      LD    A, (HL)           ; loading the element into A 
+      CALL  outputchar        ; output digit
+
+    ; least significant digit
+LSD:
+      LD    A, C        ; setting A back to original
+      AND   0Fh               ; A is now within the range 0-F
+      LD    HL, characters    ; loading the start of array into HL
+      ADD   A, L              ; indexing the array
+      LD    L, A              ; loading the new index into L
+      LD    A, (HL)           ; loading the element into A 
+      CALL  outputchar        ; output digit
+
+      LD    A, C        ; put the original value of A back into A.
+      RET ; returning
+
+characters: .ascii "0123456789ABCDEF"
+
+
+total time: 0.0075 sec.
 no errors
