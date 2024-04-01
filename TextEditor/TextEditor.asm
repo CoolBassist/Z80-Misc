@@ -1,41 +1,42 @@
-; Program for outputting text from a keyboard
+; Program for outputting text from a keyboard.
+; 213 bytes total.
+
 ; Written by github.com/coolbassist
 
 
-; +------+------------------------------------------------------+
-; | ADDR | Function                                             |
-; +------+------------------------------------------------------+
-; |8000h | Temporary location for the A register                |
-; |8001h | Temporary location for H                             |
-; |8002h | Temporary location for L                             |
-; |8003h | Write pointer for CB                                 |
-; |8004h | Read pointer for CB                                  |
-; |   ....                                                      |
-; |8010h | Begin circular buffer                                |
-; |   ....                                                      |
-; |804Fh | End circular buffer                                  |
-; +------+------------------------------------------------------+
+; +-------+------------------------------------------------------+
+; |  ADDR | Function                                             |
+; +-------+------------------------------------------------------+
+; | 8000h | Temporary location for the A register                |
+; | 8001h | Temporary location for H                             |
+; | 8002h | Temporary location for L                             |
+; | 8003h | Write pointer for CB                                 |
+; | 8004h | Read pointer for CB                                  |
+; |    ....                                                      |
+; | 8010h | Begin circular buffer                                |
+; |    ....                                                      |
+; | 804Fh | End circular buffer                                  |
+; +-------+------------------------------------------------------+
  
-; +-------+----------------------------------------------+
-; |  REG  | Function                                     |
-; +-------+----------------------------------------------+
-; |   A   | Main register                                |
-; |   B   | Used for temporarily holding values from A   |
-; |   C   | How many characters are on the current line  |
-; |   D   | Used for holding what line we're on          |
-; |   E   | ~Unused~                                     |
-; |   H   | Used for holding the high byte of addresses  |
-; |   L   | Used for holding the low byte of addresses   |
-; +-------+----------------------------------------------+
+; +-------+------------------------------------------------------+
+; |  REG  | Function                                             |
+; +-------+------------------------------------------------------+
+; |   A   | Main register                                        |
+; |   B   | Holding values for comparing, or temp storage        |
+; |   C   | How many characters are on the current line          |
+; |   D   | Used for holding what line we're on                  |
+; |   E   | Used for temporarily holding A                       |
+; |   H   | Used for holding the high byte of addresses          |
+; |   L   | Used for holding the low byte of addresses           |
+; +-------+------------------------------------------------------+
 
 LCDCOM      equ 2             ; For sending a command to the LCD
 LCDCHR      equ 3             ; For sending a character to the LCD
 
-T_A         equ 8000h         ; Temporary A
-T_HL        equ 8001h         ; Temporary H
-;           equ 8002h         ; Temporary L
-CB_WR       equ 8003h         ; Circular Buffer write pointer
-CB_RD       equ 8004h         ; Circular Buffer read pointer
+T_HL        equ 8000h         ; Temporary H
+;           equ 8001h         ; Temporary L
+CB_WR       equ 8002h         ; Circular Buffer write pointer
+CB_RD       equ 8003h         ; Circular Buffer read pointer
 CB_ST       equ 10h           ; Circular Buffer start location
 CB_END      equ 4Fh           ; Circular Buffer end location
 
@@ -134,14 +135,14 @@ start:
 
 outputchar:
       LD    (T_HL), HL        ; Stores HL into a temporary location
-      LD    (T_A), A          ; Stores A  into a temporary location
+      LD    E, A              ; Stores A  into a temporary location
 
       ; Do we need to go onto a new line?
       LD    A, C
       CP    A, 16             ; Is the current number of characters equal to 16?
       CALL  Z, lb             ; If so, put a line break
 
-      LD    A,  (T_A)         ; Restores A
+      LD    A,  E             ; Restores A
       CP    A,  13            ; Is the current character a line break?
       JP    nz, nonlb         ; If not, continue to the non line break section
 
@@ -159,7 +160,7 @@ nonlb:
       OUT   LCDCHR, A
 charcleanup:
       LD    HL, (T_HL)        ; Restores HL
-      LD    A, (T_A)          ; Restores A
+      LD    A, E              ; Restores A
       RET
 clear:
       LD    A, 01h
