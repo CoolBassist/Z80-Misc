@@ -5,14 +5,11 @@
 ; +------+------------------------------------------------------+
 ; | ADDR | Function                                             |
 ; +------+------------------------------------------------------+
-; |8000h | Temporary location for the A register (outputchar)   |
-; |8001h | Number of characters on current line                 |
-; |8002h | Temporary location for H                             |
-; |8003h | Temporary location for L                             |
-; |8004h | Current line number (0 or 1)                         |
-; |8005h | Temporary location for the A register (outputnum)    |
-; |8006h | Write pointer for CB                                 |
-; |8007h | Read pointer for CB                                  |
+; |8000h | Temporary location for the A register                |
+; |8001h | Temporary location for H                             |
+; |8002h | Temporary location for L                             |
+; |8003h | Write pointer for CB                                 |
+; |8004h | Read pointer for CB                                  |
 ; |   ....                                                      |
 ; |8010h | Begin circular buffer                                |
 ; |   ....                                                      |
@@ -34,13 +31,13 @@
 LCDCOM      equ 2             ; For sending a command to the LCD
 LCDCHR      equ 3             ; For sending a character to the LCD
 
-T_A        equ 8000h          ; Temporary A
-T_HL       equ 8001h          ; temporary HL
-;          equ 8002h          ; reserve 8002h for HL
-CB_WR       equ 8003h         ; Circular Buffer write 
-CB_RD       equ 8004h         ; Circular Buffer read
-CB_ST       equ 10h           ; Circular Buffer start
-CB_END      equ 4Fh           ; Circular Buffer end
+T_A         equ 8000h         ; Temporary A
+T_HL        equ 8001h         ; Temporary H
+;           equ 8002h         ; Temporary L
+CB_WR       equ 8003h         ; Circular Buffer write pointer
+CB_RD       equ 8004h         ; Circular Buffer read pointer
+CB_ST       equ 10h           ; Circular Buffer start location
+CB_END      equ 4Fh           ; Circular Buffer end location
 
       org 0
 
